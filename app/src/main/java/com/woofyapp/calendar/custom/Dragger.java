@@ -16,7 +16,7 @@ import com.woofyapp.calendar.R;
  */
 public class Dragger extends View {
 
-    float centerX = -1,centerY = -1,width=0;
+    float centerX = -1,centerY = -1,width=0,height=0,startsAt;
     RectF rectF;
     Paint pRect,pImage;
     int colorOrange;
@@ -30,11 +30,9 @@ public class Dragger extends View {
     private final String TAG  = "DRAGGER_LOG";
     private final int MIN_HEIGHT = 90;
     public int id;
-    public boolean shouldHandle = true;
-    TextView tvTime;
     Paint pText;
     private DraggerInterface view;
-
+    private final int startTime = 7;
 
 
     public Dragger(Context context) {
@@ -57,26 +55,27 @@ public class Dragger extends View {
         fDown = new float[2];
     }
 
-    public float getRectHeight(){
-        float rectHeight = Math.abs(fRect[1] - fRect[3]);
-        if (rectHeight < MIN_HEIGHT) {
+//    public float getRectHeight(){
+//        float rectHeight = Math.abs(fRect[1] - fRect[3]);
+//        if (rectHeight < MIN_HEIGHT) {
+//
+//                if(isUp){
+//                    fRect[1] -= MIN_HEIGHT - rectHeight + 1;
+//                    setUpDown();
+//                    invalidate();
+//                }else if(isDown){
+//                    fRect[3] += MIN_HEIGHT - rectHeight + 1;
+//                    setUpDown();
+//                    invalidate();
+//                }
+//            return MIN_HEIGHT-1;
+//        }
+//        return rectHeight;
+//    }
 
-                if(isUp){
-                    fRect[1] -= MIN_HEIGHT - rectHeight + 1;
-                    setUpDown();
-                    invalidate();
-                }else if(isDown){
-                    fRect[3] += MIN_HEIGHT - rectHeight + 1;
-                    setUpDown();
-                    invalidate();
-                }
-            return MIN_HEIGHT-1;
-        }
-        return rectHeight;
-
-    }
-    public void setWidth(float width){
+    public void setParams(float width,float height){
         this.width = width;
+        this.height = height;
     }
 
 
@@ -86,9 +85,9 @@ public class Dragger extends View {
 
 
         fRect[0] = centerX - (width/2);
-        fRect[1] = centerY - 50;
+        fRect[1] = centerY - (height/2);
         fRect[2] = centerX + (width/2);
-        fRect[3] = centerY + 50;
+        fRect[3] = centerY + (height/2);
 
         setUpDown();
     }
@@ -128,7 +127,11 @@ public class Dragger extends View {
         bDown = BitmapFactory.decodeResource(getResources(),R.drawable.ic_down);
         canvas.drawBitmap(bDown, fDown[0], fDown[1], pImage);
 
-        canvas.drawText("7-8 p.m",0,7,centerX-35,centerY,pText);
+        String start = getTime(fRect[1]);
+        String end = getTime(fRect[3]);
+
+
+        canvas.drawText(start+" - "+end,((fRect[0]+fRect[2])/2)-20,(fRect[1]+fRect[3])/2,pText);
     }
 
     @Override
@@ -225,6 +228,14 @@ public class Dragger extends View {
         invalidate();
     }
 
+    public String getTime(float top){
+        int minutes = (int)((top - startsAt)/(height/60))%60;
+        int hours = ((int)((top-startsAt)/(height/60))/60)+startTime;
+        String min = (minutes < 10)?"0"+minutes:""+minutes;
+        String hr = (hours<10)?"0"+hours:""+hours;
+
+        return hr+":"+min;
+    }
     public void setBottom(float y){
         fRect[3] = y;
         setUpDown();
@@ -255,6 +266,10 @@ public class Dragger extends View {
     
     public void addView(DraggerInterface view){
         this.view = view;
+    }
+
+    public void viewStartsAt(int startsAt) {
+        this.startsAt = startsAt;
     }
 
     public interface DraggerInterface{

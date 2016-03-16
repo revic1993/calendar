@@ -17,21 +17,24 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements Dragger.DraggerInterface {
 
-    CoordinatorLayout clLayot;
     GestureDetector detector;
-    MaterialCalendarView calendar;
+//    MaterialCalendarView calendar;
     ArrayList<Dragger> draggers;
     RelativeLayout rlSelectable;
-    int width;
+    int width,height,count=0,startsAt=0;
     float centerX;
+
     String TAG = "MAIN_DRAGGER";
-    public int count=0;
+
+    View view;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.calendar_view);
 
+        view = findViewById(R.id.view1);
         rlSelectable = (RelativeLayout) findViewById(R.id.rlSelectable);
         draggers = new ArrayList<Dragger>();
 
@@ -47,6 +50,7 @@ public class MainActivity extends AppCompatActivity implements Dragger.DraggerIn
                 float x = MotionEventCompat.getX(e, index);
                 float y = MotionEventCompat.getY(e, index);
                 addDragger(centerX,y);
+
                 return true;
             }
         });
@@ -74,17 +78,21 @@ public class MainActivity extends AppCompatActivity implements Dragger.DraggerIn
         super.onWindowFocusChanged(hasFocus);
         width = rlSelectable.getWidth();
         centerX = (rlSelectable.getRight()-rlSelectable.getLeft())/2;
+        height = view.getHeight();
+        startsAt = view.getTop();
     }
 
 
     public void addDragger(float x,float y) {
         Dragger dragger = new Dragger(MainActivity.this);
-        dragger.setWidth(width);
+        dragger.setParams(width,height);
         dragger.setCenter(x, y);
-        dragger.id = count++;
         draggers.add(dragger);
+        dragger.setId(count++);
+        dragger.viewStartsAt(startsAt);
         dragger.addView(this);
         rlSelectable.addView(dragger);
+
     }
 
 
@@ -96,11 +104,12 @@ public class MainActivity extends AppCompatActivity implements Dragger.DraggerIn
 
     @Override
     public void checkBounds(Dragger current) {
-        int currentId = current.id;
+        int currentId = current.getId();
 
         if(draggers.size()>1){
             for(Dragger dragger : draggers){
-                if(currentId !=dragger.id){
+
+                if(currentId !=dragger.getId()){
                     if(current.getUpState() && current.getRectTop()<dragger.getRectBootom() && current.getRectBootom() > dragger.getRectTop()){
                         dragger.setBottom(current.getRectBootom());
                         current.removeView();
