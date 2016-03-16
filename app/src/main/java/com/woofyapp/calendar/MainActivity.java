@@ -97,24 +97,20 @@ public class MainActivity extends AppCompatActivity implements Dragger.DraggerIn
     @Override
     public void checkBounds(Dragger current) {
         int currentId = current.id;
+
         if(draggers.size()>1){
             for(Dragger dragger : draggers){
                 if(currentId !=dragger.id){
-                    if(current.getUpState() && current.getRectTop()<dragger.getRectBootom()){
-
+                    if(current.getUpState() && current.getRectTop()<dragger.getRectBootom() && current.getRectBootom() > dragger.getRectTop()){
                         dragger.setBottom(current.getRectBootom());
                         current.removeView();
                         draggers.remove(current);
                         break;
-                    }else if(!current.getUpState() && current.getRectBootom() > dragger.getRectTop()){
-
-                        log("down called "+current.getRectBootom()+" dragger "+dragger.getRectBootom());
+                    }else if(!current.getUpState() && current.getRectBootom() > dragger.getRectTop() && current.getRectTop() < dragger.getRectBootom()){
                         dragger.setTop(current.getRectTop());
                         current.removeView();
                         draggers.remove(current);
-                        log("after current "+dragger.getRectTop());
                         break;
-
                     }
                 }
             }
